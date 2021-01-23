@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from my_shop.models import Product
 from my_shop.forms import ProdForm
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 
 def main_page(request):
@@ -57,5 +58,5 @@ def search_page(request):
     search_val = request.GET.get('q')
     products = ''
     if search_val:
-        products = Product.objects.filter(title__icontains=search_val)
+        products = Product.objects.filter(Q(title__icontains=search_val) | Q(description__icontains=search_val))
     return render(request, 'my_shop/search.html', context={'products':products})
