@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 
 def main_page(request):
     products_all = Product.objects.all()
-    paginator = Paginator(products_all, 3)
+    paginator = Paginator(products_all, 6)
     page_num = request.GET.get('page', 1)
     products = paginator.get_page(page_num)
     return render(request, 'my_shop/main.html', context={'products':products.object_list, 'paginator':products})
@@ -51,3 +51,11 @@ def update_page(request, pid):
     obj = get_object_or_404(Product, id=pid)
     bound_form = ProdForm(instance=obj)
     return render(request, 'my_shop/update.html', context={'form':bound_form})
+
+
+def search_page(request):
+    search_val = request.GET.get('q')
+    products = ''
+    if search_val:
+        products = Product.objects.filter(title__icontains=search_val)
+    return render(request, 'my_shop/search.html', context={'products':products})
