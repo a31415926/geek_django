@@ -1,0 +1,29 @@
+{% extends 'my_shop/base.html' %}
+
+{% block content %}
+    {{goods_info}}
+    <br>
+    price: {{goods_info.price}}
+    <br>
+    description: {{goods_info.description}}
+    <br>
+    quantity: {{goods_info.quantity}}
+    <br>
+    is_active: {{goods_info.is_active}}
+    <br>
+    date_add: {{goods_info.date_add}}
+
+
+    <form action="" method='POST'>
+        {% csrf_token %}
+            <a href="{% url 'post_update' goods_info.id %}" class="btn btn-primary mt-2">UPDATE</a><br><br><br>
+
+            <button type="submit" class="btn btn-primary mt-2" name="delete" value='{{goods_info.id}}'>Delete</button>
+
+        {% if goods_info.is_active %}
+            <button type="submit" class="btn btn-primary mt-2" name="hide" value='{{goods_info.id}}'>Hide</button>
+        {% else %}
+            <button type="submit" class="btn btn-primary mt-2" name='activate' value="{{goods_info.id}}">activate</button>
+        {% endif %}
+        </form>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'my_shop/base.html' %}
+{% block content %}
+<div class = 'm-5'>
+    <form action="" method="POST">
+        <div class = 'mb-5'>
+        {% csrf_token %}
+        {% for i in form %}
+        <div class="form-group">
+            {{ i.label }}
+            {{ i }}
+            {% if i.errors%}
+                <div class="alert alert-danger">{{i.errors}}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary mt-2">Update</button>
+    </form>
+</div>
+{% endblock %}
