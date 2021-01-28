@@ -3,6 +3,7 @@ from my_shop.models import Product
 from my_shop.forms import ProdForm
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.core import serializers
 
 
 def main_page(request):
@@ -24,6 +25,8 @@ def create_page(request):
     return render(request, 'my_shop/create.html', context={'forms': form})
 
 def details_page(request, pid):
+    goods_info = get_object_or_404(Product, id=pid)
+
     if request.method == 'POST':
         form = request.POST
         if form.get('activate'):
@@ -37,7 +40,20 @@ def details_page(request, pid):
         elif form.get('delete'):
             post = Product.objects.get(id=form['delete']).delete()
             return redirect('main_page')
+        elif form.get('add2basket'):
+            print(form)
+            if not request.session.get('basket'):
+                request.session['basket'] = {}
+            goods_info = get_object_or_404(Product, id=pid)
+            request.session['basket'][str(pid)] = {'qty' : int(form.get('add2basket')), 
+                                                    'price':goods_info.price,
+                                                    'title':goods_info.title,
+                                                    }
+            print(request.session['basket'])
 
+    if not request.session.get('basket'):
+        request.session['basket'] = {}
+    
     goods_info = get_object_or_404(Product, id=pid)
     return render(request, 'my_shop/goods.html', context={'goods_info':goods_info})
 
@@ -60,3 +76,30 @@ def search_page(request):
     if search_val:
         products = Product.objects.filter(Q(title__icontains=search_val) | Q(description__icontains=search_val))
     return render(request, 'my_shop/search.html', context={'products':products})
+
+
+def basket_page(request):
+    if request.method == 'POST':
+        form_post = request.POST
+        print(form_post)
+        if form_post.get('edit_qty'):
+            request.session['basket'][form_post.get('pid')]['qty'] = int(form_post.get('edit_qty'))
+            print(request.session['basket'])
+        elif form_post.get('del'):
+            del request.session['basket'][form_post.get('del')]
+        elif form_post.get('-'):
+            goods_qty = Product.objects.get(id=int(form_post.get('-')))
+            if request.session['basket'][form_post.get('-')]['qty'] > 1:
+                request.session['basket'][form_post.get('-')]['qty'] -= 1
+            
+        elif form_post.get('+'):
+            goods_qty = Product.objects.get(id=int(form_post.get('+')))
+            if goods_qty.quantity - request.session['basket'][form_post.get('+')]['qty'] > 1:
+                request.session['basket'][form_post.get('+')]['qty'] += 1
+            
+    if not request.session.get('basket'):
+        request.session['basket'] = {}
+    products = request.session['basket']
+    print(request.session['basket'])
+
+    return render(request, 'my_shop/basket.html', context={'products':products})

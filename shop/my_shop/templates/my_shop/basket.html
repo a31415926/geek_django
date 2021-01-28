@@ -1,0 +1,22 @@
+{% extends 'my_shop/base.html' %}
+
+{% block content %}
+
+    {% for key, val in products.items %}
+        {{val.title}}<br>
+        QTY: {{val.qty}}<br>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <input type="number" name="edit_qty" step=1 min=1 style="width:50px;">
+            <input type="hidden" name="pid" value="{{ key }}">
+            <input type="submit" value="Изменить">
+        </form>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <button type='submit' name="-" value="{{ key }}" class="btn btn-primary mt-2">-</button>
+            <button type='submit' name="del" value="{{ key }}" class="btn btn-primary mt-2">del</button>
+            <button type='submit' name="+" value="{{ key }}" class="btn btn-primary mt-2">+</button>
+
+        </form>
+    {% endfor %}
+{% endblock %}

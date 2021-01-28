@@ -14,10 +14,15 @@
     date_add: {{goods_info.date_add}}
 
 
-    <form action="" method='POST'>
+    <form action="" method="POST">
         {% csrf_token %}
-            <a href="{% url 'post_update' goods_info.id %}" class="btn btn-primary mt-2">UPDATE</a><br><br><br>
+        <input type="number" name="add2basket" step=1 min="1" max="{{ goods_info.quantity }}">
+        <input type="submit">
+    </form>
 
+    <form action="{% url 'post_detail' goods_info.id %}" method='POST'>
+        {% csrf_token %}
+            <a href="{% url 'post_update' goods_info.id %}" class="btn btn-primary mt-2">UPDATE</a><br>
             <button type="submit" class="btn btn-primary mt-2" name="delete" value='{{goods_info.id}}'>Delete</button>
 
         {% if goods_info.is_active %}
