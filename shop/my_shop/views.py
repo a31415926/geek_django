@@ -59,4 +59,4 @@ def search_page(request):
     products = ''
     if search_val:
         products = Product.objects.filter(Q(title__icontains=search_val) | Q(description__icontains=search_val))
-    return render(request, 'my_shop/search.html', context={'products':products})
+    return render(request, 'my_shop/search.html', context={'products':products} )
