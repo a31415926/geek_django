@@ -15,3 +15,15 @@ class Product(models.Model):
 
     class Meta:
         ordering = ['-date_add']
+
+
+class Basket(models.Model):
+    id_product = models.IntegerField(default=1)
+    title = models.CharField(max_length=200, default='Empty')
+    qty = models.IntegerField(default=1)
+    price = models.FloatField(default=0)
+    date_add = models.DateTimeField(auto_now_add=True)
+    ssid = models.CharField(max_length=150, default='empty')
+
+    def __str__(self):
+        return self.ssid

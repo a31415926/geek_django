@@ -12,6 +12,11 @@
     is_active: {{goods_info.is_active}}
     <br>
     date_add: {{goods_info.date_add}}
+    <form action="" method="POST">
+        {% csrf_token %}
+        <input type="number" name="add2basket" step=1 min="1" max="{{ goods_info.quantity }}">
+        <input type="submit">
+    </form>
 
 
     <form action="" method='POST'>
