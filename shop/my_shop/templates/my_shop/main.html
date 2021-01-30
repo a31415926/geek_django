@@ -6,37 +6,12 @@
       <div class="col-sm-6">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">{{ product.title | truncatechars:30 }}</h5>
-            <p class="card-text">{{ product.price }}$</p>
-            <a href="{% url 'post_detail' product.id %}" class="btn btn-primary">Go somewhere</a>
+            <h5 class="card-title">{{ product.name | truncatechars:30 }}</h5>
+            <a href="{% url 'cats_page' product.id %}" class="btn btn-primary">Go somewhere</a>
           </div>
         </div>
       </div>
     {% endfor %}
   </div>
-<nav aria-label="...">
-    <ul class="pagination">
-      <li class="page-item disabled">
-        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-      </li>
-      
- 
-      {% for n in paginator.paginator.page_range %}
-
-      {% if paginator.number == n %}
-      <li class="page-item active" aria-current="page">
-        <a class="page-link" href="#">{{n}}</a>
-      </li>
-      {%elif n > paginator.number|add:-3 and n < paginator.number|add:3  %}
-        <li class="page-item" aria-current="page">
-            <a class="page-link" href="?page={{n}}">{{n}}</a>
-        </li>
-    {%endif%}
-      {% endfor %}
-      <li class="page-item">
-        <a class="page-link" href="#">Next</a>
-      </li>
-    </ul>
-  </nav>
 </main>
 {% endblock %}

@@ -17,6 +17,7 @@
     <form action="" method="POST">
         {% csrf_token %}
         <input type="number" name="add2basket" step=1 min="1" max="{{ goods_info.quantity }}">
+        <input type="hidden" name="qty" value="{{ goods_info.id }}">
         <input type="submit">
     </form>
 

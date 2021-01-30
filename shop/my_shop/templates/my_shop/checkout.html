@@ -1,0 +1,26 @@
+{% extends 'my_shop/base.html' %}
+
+{% block content %}
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">QTY</th>
+        <th scope="col">Price</th>
+        <th scope="col">Total cost</th>
+      </tr>
+    </thead>
+    <tbody>
+
+    {% for key, val in products.items %}
+    <tr>
+        <td>{{val.title}}</td>
+        <td>{{val.qty}}</td>
+        <td>{{val.price}}</td>
+        <td>{% widthratio val.qty 1 val.price %}</td>
+      </tr>
+    {% endfor %}
+</tbody>
+    <h3>Total cost {{total_cost}}</h3>
+</table>
+{% endblock %}

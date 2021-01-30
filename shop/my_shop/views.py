@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from my_shop.models import Product
-from my_shop.forms import ProdForm
+from my_shop.models import Product, Categories
+from my_shop.forms import ProdForm, CatForm
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.core import serializers
+from django.forms.models import model_to_dict
 
 
 def main_page(request):
-    products_all = Product.objects.all()
+    products_all = Categories.objects.all()
     paginator = Paginator(products_all, 6)
     page_num = request.GET.get('page', 1)
     products = paginator.get_page(page_num)
@@ -23,6 +24,17 @@ def create_page(request):
     form = ProdForm()
 
     return render(request, 'my_shop/create.html', context={'forms': form})
+
+def create_cats(request):
+    if request.method == 'POST':
+        form_post = CatForm(request.POST)
+        if form_post.is_valid():
+            new_obj = form_post.save()
+            return redirect('main_page')
+
+    form = CatForm()
+
+    return render(request, 'my_shop/create_cat.html', context={'forms': form})
 
 def details_page(request, pid):
     goods_info = get_object_or_404(Product, id=pid)
@@ -41,14 +53,13 @@ def details_page(request, pid):
             post = Product.objects.get(id=form['delete']).delete()
             return redirect('main_page')
         elif form.get('add2basket'):
-            print(form)
             if not request.session.get('basket'):
                 request.session['basket'] = {}
-            goods_info = get_object_or_404(Product, id=pid)
-            request.session['basket'][str(pid)] = {'qty' : int(form.get('add2basket')), 
-                                                    'price':goods_info.price,
-                                                    'title':goods_info.title,
-                                                    }
+            goods_info = model_to_dict(get_object_or_404(Product, id=pid))
+            del goods_info['cid']
+            request.session['basket'][str(pid)] = goods_info
+            request.session['basket'][str(pid)]['qty'] = form.get('qty')
+
             print(request.session['basket'])
 
     if not request.session.get('basket'):
@@ -60,7 +71,8 @@ def details_page(request, pid):
 def update_page(request, pid):
 
     if request.method == 'POST':
-        form_post = ProdForm(request.POST)
+        obj = Product.objects.get(id=pid)
+        form_post = ProdForm(request.POST, instance=obj)
         if form_post.is_valid():
             new_obj = form_post.save()
             return redirect('post_detail', pid=new_obj.id)
@@ -68,6 +80,13 @@ def update_page(request, pid):
     obj = get_object_or_404(Product, id=pid)
     bound_form = ProdForm(instance=obj)
     return render(request, 'my_shop/update.html', context={'form':bound_form})
+
+def cats_page(request, pid):
+    products_all = Product.objects.all()
+    paginator = Paginator(products_all, 6)
+    page_num = request.GET.get('page', 1)
+    products = paginator.get_page(page_num)
+    return render(request, 'my_shop/cats.html', context={'products':products.object_list, 'paginator':products})
 
 
 def search_page(request):
@@ -87,15 +106,18 @@ def basket_page(request):
             print(request.session['basket'])
         elif form_post.get('del'):
             del request.session['basket'][form_post.get('del')]
+
         elif form_post.get('-'):
-            goods_qty = Product.objects.get(id=int(form_post.get('-')))
-            if request.session['basket'][form_post.get('-')]['qty'] > 1:
-                request.session['basket'][form_post.get('-')]['qty'] -= 1
+            good_id = form_post.get('-')
+            goods_qty = Product.objects.get(id=int(good_id))
+            if request.session['basket'][good_id]['qty'] > 1:
+                request.session['basket'][good_id]['qty'] -= 1
             
         elif form_post.get('+'):
-            goods_qty = Product.objects.get(id=int(form_post.get('+')))
-            if goods_qty.quantity - request.session['basket'][form_post.get('+')]['qty'] > 1:
-                request.session['basket'][form_post.get('+')]['qty'] += 1
+            good_id = form_post.get('+')
+            goods_qty = Product.objects.get(id=int(good_id))
+            if goods_qty.quantity - request.session['basket'][good_id]['qty'] > 1:
+                request.session['basket'][good_id]['qty'] += 1
             
     if not request.session.get('basket'):
         request.session['basket'] = {}
@@ -103,3 +125,19 @@ def basket_page(request):
     print(request.session['basket'])
 
     return render(request, 'my_shop/basket.html', context={'products':products})
+
+
+def checkout_page(request):
+     
+    if not request.session.get('basket'):
+        request.session['basket'] = {}
+    products = request.session['basket']
+    temp_cost = request.session['basket'].values()
+    total_cost = 0
+    for i in temp_cost:
+        total_cost+=int(i['qty'])*i['price']
+    
+
+    return render(request, 'my_shop/checkout.html', context={'products':products, 'total_cost':total_cost})
+
+
