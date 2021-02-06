@@ -1,10 +1,11 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from my_shop.models import Product, Categories
 from my_shop.forms import ProdForm, CatForm
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.core import serializers
 from django.forms.models import model_to_dict
+import json
 
 
 def main_page(request):
@@ -58,7 +59,7 @@ def details_page(request, pid):
             goods_info = model_to_dict(get_object_or_404(Product, id=pid))
             del goods_info['cid']
             request.session['basket'][str(pid)] = goods_info
-            request.session['basket'][str(pid)]['qty'] = form.get('qty')
+            request.session['basket'][str(pid)]['qty'] = int(form.get('add2basket'))
 
             print(request.session['basket'])
 
@@ -101,23 +102,38 @@ def basket_page(request):
     if request.method == 'POST':
         form_post = request.POST
         print(form_post)
-        if form_post.get('edit_qty'):
-            request.session['basket'][form_post.get('pid')]['qty'] = int(form_post.get('edit_qty'))
-            print(request.session['basket'])
-        elif form_post.get('del'):
-            del request.session['basket'][form_post.get('del')]
 
-        elif form_post.get('-'):
-            good_id = form_post.get('-')
-            goods_qty = Product.objects.get(id=int(good_id))
-            if request.session['basket'][good_id]['qty'] > 1:
-                request.session['basket'][good_id]['qty'] -= 1
+
+        if form_post.get('action'):
+            if form_post['action'] == 'edit_qty':
+                good_id = form_post.get('id')
+                request.session['basket'][good_id]['qty'] = int(form_post.get('qty'))
+                data = request.session['basket'][good_id] 
+                return HttpResponse(json.dumps(data), content_type='application/json')
+
+            elif form_post['action'] == '-':
+                good_id = form_post.get('id')
+                goods_qty = Product.objects.get(id=int(good_id))
+                if request.session['basket'][good_id]['qty'] > 1:
+                    request.session['basket'][good_id]['qty'] -= 1
+                    data = request.session['basket'][good_id] 
+                    return HttpResponse(json.dumps(data), content_type='application/json')
+                
+            elif form_post['action'] == '+':
+                good_id = form_post.get('id')
+                goods_qty = Product.objects.get(id=int(good_id))
+                if goods_qty.quantity - request.session['basket'][good_id]['qty'] > 1:
+                    request.session['basket'][good_id]['qty'] += 1
+                    data = request.session['basket'][good_id] 
+                    return HttpResponse(json.dumps(data), content_type='application/json')
             
-        elif form_post.get('+'):
-            good_id = form_post.get('+')
-            goods_qty = Product.objects.get(id=int(good_id))
-            if goods_qty.quantity - request.session['basket'][good_id]['qty'] > 1:
-                request.session['basket'][good_id]['qty'] += 1
+            elif form_post['action'] == 'del':
+                good_id = form_post.get('id')
+                del request.session['basket'][good_id]
+                data = {'del':good_id}
+                return HttpResponse(json.dumps(data), content_type='application/json')
+
+
             
     if not request.session.get('basket'):
         request.session['basket'] = {}
