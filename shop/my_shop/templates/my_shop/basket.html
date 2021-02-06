@@ -1,24 +1,19 @@
-{% extends 'my_shop/base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
-{% load static %}
-<script>
-    window.myApp = {}
-    window.myApp.scrf = '{{ csrf_token }}';</script>
+
+    {% load static %}
+    <script>window.myApp = {};window.myApp.scrf = '{{ csrf_token }}';</script>
     <script src="{% static 'my_shop/basket.js' %}"></script>
     {% for key, val in products.items %}
     <span id='entry_{{ val.id }}'>
-    <a href="{% url 'post_detail' val.id %}">{{val.title}}</a>
-    <br>
+        <a href="{% url 'post_detail' val.id %}">{{val.title}}</a><br>
         QTY: <span id="cnt_{{ val.id }}">{{val.qty}}</span><br>
         <input type="number" id="edit_cnt_{{ val.id }}" step=1 min=1 style="width:50px;" value="{{val.qty}}">
-        <button value="-" class="btn btn-primary mt-2" onclick="test('edit_qty', {{ key }})">edit</button>
-        <br><br>
-        <button value="-" class="btn btn-primary mt-2" onclick="test('-', {{ key }})">-</button>
-        <button value="{{ key }}" class="btn btn-primary mt-2" onclick="test('del', {{ key }})">del</button>
-        <button value="+" class="btn btn-primary mt-2" onclick="test('+', {{ key }})">+</button>
-    
-            <br><br>
-        </span>
+        <button value="-" class="btn btn-primary" onclick="basket('edit_qty', {{ key }})">edit</button><br>
+        <button value="-" class="btn btn-primary mt-2" onclick="basket('-', {{ key }})">-</button>
+        <button value="{{ key }}" class="btn btn-primary mt-2" onclick="basket('del', {{ key }})">del</button>
+        <button value="+" class="btn btn-primary mt-2" onclick="basket('+', {{ key }})">+</button><br><br>
+    </span>
     {% endfor %}
 {% endblock %}

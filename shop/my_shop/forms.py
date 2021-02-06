@@ -33,7 +33,6 @@ class ProdForm(ModelForm):
                     'is_active':CheckboxInput(attrs={'class':''}),
                     'desc':Textarea(attrs={'class':'form-control',
                                                 'style':"width:75%"})
-        
         }
 
 

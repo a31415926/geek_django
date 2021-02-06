@@ -3,7 +3,6 @@ from my_shop.models import Product, Categories
 from my_shop.forms import ProdForm, CatForm
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.core import serializers
 from django.forms.models import model_to_dict
 import json
 
@@ -94,7 +93,7 @@ def search_page(request):
     search_val = request.GET.get('q')
     products = ''
     if search_val:
-        products = Product.objects.filter(Q(title__icontains=search_val) | Q(description__icontains=search_val))
+        products = Product.objects.filter(Q(title__icontains=search_val) | Q(desc__icontains=search_val))
     return render(request, 'my_shop/search.html', context={'products':products})
 
 

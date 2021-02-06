@@ -1,4 +1,4 @@
-function test(actions, id){
+function basket(actions, id){
     $.ajax({
         type : "POST",
         url : '',
@@ -7,7 +7,6 @@ function test(actions, id){
             'id':id,
             'action':actions,
             'qty':document.getElementById('edit_cnt_'+id).value,
-    
         }, 
         dataType: 'json',
         cache: false, 
