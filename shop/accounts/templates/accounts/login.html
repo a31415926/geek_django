@@ -18,6 +18,9 @@
 {% if user.is_authenticated %}
 {% else %}
 
+<a href="{% url 'social:begin' "google-oauth2" %}">Google</a>
+<br><br>
+
 <form method="post" action="{% url 'login' %}">
 {% csrf_token %}
 <table>

@@ -4,40 +4,34 @@ from my_shop.forms import ProdForm, CatForm
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.forms.models import model_to_dict
+from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView
+from django.urls import reverse_lazy
 import json
 
 
-def main_page(request):
-    products_all = Categories.objects.all()
-    paginator = Paginator(products_all, 6)
-    page_num = request.GET.get('page', 1)
-    products = paginator.get_page(page_num)
-    return render(request, 'my_shop/main.html', context={'products':products.object_list, 'paginator':products})
+class HomePage(ListView):
+    """ главная """
+    model = Categories
+    template_name = 'my_shop/main.html'
+    context_object_name = 'products'
 
-def create_page(request):
-    if request.method == 'POST':
-        form_post = ProdForm(request.POST)
-        if form_post.is_valid():
-            new_obj = form_post.save()
-            return redirect('post_detail', pid=new_obj.id)
 
-    form = ProdForm()
+class CreateGoodsView(CreateView):
+    model = Product
+    template_name = 'my_shop/create.html'
+    form_class = ProdForm
+    success_url = reverse_lazy('post_detail')
 
-    return render(request, 'my_shop/create.html', context={'forms': form})
 
-def create_cats(request):
-    if request.method == 'POST':
-        form_post = CatForm(request.POST)
-        if form_post.is_valid():
-            new_obj = form_post.save()
-            return redirect('main_page')
+class CreateCategoryView(CreateView):
+    model = Categories
+    template_name = 'my_shop/create.html'
+    form_class = ProdForm
+    success_url = reverse_lazy('main_page')
 
-    form = CatForm()
 
-    return render(request, 'my_shop/create_cat.html', context={'forms': form})
-
-def details_page(request, pid):
-    goods_info = get_object_or_404(Product, id=pid)
+def details_page(request, pk):
+    goods_info = get_object_or_404(Product, id=pk)
 
     if request.method == 'POST':
         form = request.POST
@@ -55,38 +49,38 @@ def details_page(request, pid):
         elif form.get('add2basket'):
             if not request.session.get('basket'):
                 request.session['basket'] = {}
-            goods_info = model_to_dict(get_object_or_404(Product, id=pid))
+            goods_info = model_to_dict(get_object_or_404(Product, id=pk))
             del goods_info['cid']
-            request.session['basket'][str(pid)] = goods_info
-            request.session['basket'][str(pid)]['qty'] = int(form.get('add2basket'))
+            request.session['basket'][str(pk)] = goods_info
+            request.session['basket'][str(pk)]['qty'] = int(form.get('add2basket'))
 
             print(request.session['basket'])
 
     if not request.session.get('basket'):
         request.session['basket'] = {}
     
-    goods_info = get_object_or_404(Product, id=pid)
+    goods_info = get_object_or_404(Product, id=pk)
     return render(request, 'my_shop/goods.html', context={'goods_info':goods_info})
 
-def update_page(request, pid):
 
-    if request.method == 'POST':
-        obj = Product.objects.get(id=pid)
-        form_post = ProdForm(request.POST, instance=obj)
-        if form_post.is_valid():
-            new_obj = form_post.save()
-            return redirect('post_detail', pid=new_obj.id)
+class UpdateGoodsView(UpdateView):
+    """ обновление товаров """
+    model = Product
+    template_name = 'my_shop/update.html'
+    form_class = ProdForm
 
-    obj = get_object_or_404(Product, id=pid)
-    bound_form = ProdForm(instance=obj)
-    return render(request, 'my_shop/update.html', context={'form':bound_form})
+    def get_success_url(self):
+        return reverse_lazy('post_detail', kwargs={'pk': self.kwargs['pk']})
 
-def cats_page(request, pid):
-    products_all = Product.objects.all()
-    paginator = Paginator(products_all, 6)
-    page_num = request.GET.get('page', 1)
-    products = paginator.get_page(page_num)
-    return render(request, 'my_shop/cats.html', context={'products':products.object_list, 'paginator':products})
+
+class CategoryPage(ListView):
+    """ страница с материалами категории """
+    model = Product
+    template_name = 'my_shop/cats.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        return Product.objects.filter(cid = self.kwargs['pk'])
 
 
 def search_page(request):
@@ -142,17 +136,20 @@ def basket_page(request):
     return render(request, 'my_shop/basket.html', context={'products':products})
 
 
-def checkout_page(request):
-     
-    if not request.session.get('basket'):
-        request.session['basket'] = {}
-    products = request.session['basket']
-    temp_cost = request.session['basket'].values()
-    total_cost = 0
-    for i in temp_cost:
-        total_cost+=int(i['qty'])*i['price']
-    
 
-    return render(request, 'my_shop/checkout.html', context={'products':products, 'total_cost':total_cost})
+class CheckoutPage(TemplateView):
+    """ страница оформления заказа """
+    template_name = 'my_shop/checkout.html'
 
-
+    def get_context_data(self, **kwargs):
+        if not self.request.session.get('basket'):
+            self.request.session['basket'] = {}
+        products = self.request.session['basket']
+        temp_cost = self.request.session['basket'].values()
+        total_cost = 0
+        for i in temp_cost:
+            total_cost+=int(i['qty'])*i['price']
+        context = super().get_context_data(**kwargs)
+        context['products'] = products
+        context['total_cost'] = total_cost
+        return context

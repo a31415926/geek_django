@@ -4,7 +4,7 @@
     <form action="{% url 'create_page' %}" method="POST">
         <div class = 'mb-5'>
         {% csrf_token %}
-        {{forms}}
+        {{ form }}
         <br>
         <button type="submit" class="btn btn-primary mt-2">Add</button>
     </form>
