@@ -1,5 +1,5 @@
 from django.forms import ModelForm, TextInput, CheckboxInput, Textarea, SelectMultiple
-from my_shop.models import Product, Categories
+from my_shop.models import Product, Categories, Invoices
 
 
 class ProdForm(ModelForm):
@@ -43,3 +43,9 @@ class CatForm(ModelForm):
         widgets = {"name":TextInput(attrs = {'class': 'form-control', 
                                                 'style':"width:75%"}),       
         }
+
+class InvoicesForm(ModelForm):
+    class Meta:
+        model = Invoices
+        fields = ['note']
+

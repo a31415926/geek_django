@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
-from my_shop.models import Product, Categories
-from my_shop.forms import ProdForm, CatForm
+from my_shop.models import Product, Categories, Invoices
+from my_shop.forms import ProdForm, CatForm, InvoicesForm
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView
 from django.urls import reverse_lazy
 import json
+import hashlib
+from time import time
 
 
 class HomePage(ListView):
@@ -162,8 +164,10 @@ def basket_page(request):
 
 
 
-class CheckoutPage(TemplateView):
+class CheckoutPage(CreateView):
     """ страница оформления заказа """
+    model = Invoices
+    form_class = InvoicesForm
     template_name = 'my_shop/checkout.html'
 
     def get_context_data(self, **kwargs):
@@ -178,3 +182,24 @@ class CheckoutPage(TemplateView):
         context['products'] = products
         context['total_cost'] = total_cost
         return context
+
+    def form_valid(self, form):
+        self.object = form.save(commit = False)
+        self.object.user = self.request.user
+        self.object.goods = self.request.session['basket']
+        self.object.slug = hashlib.sha512((str(time()) + str(self.object.id) ).encode('utf-8')).hexdigest()
+        self.object.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('invoice_page', kwargs={'slug': self.object.slug})
+
+class InvoicesPageView(DetailView):
+    model = Invoices
+    template_name = 'my_shop/invoice.html'
+    context_object_name = 'invoice'
+
+    def get_queryset(self):
+        print(self.kwargs['slug'])
+        return Invoices.objects.filter(slug = self.kwargs['slug'])
+

@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<h3>Статус заказа:</h3>
+{{ invoice.get_status_display }}
 <table class="table">
     <thead>
       <tr>
@@ -11,8 +13,7 @@
       </tr>
     </thead>
     <tbody>
-
-    {% for key, val in products.items %}
+    {% for key, val in invoice.goods.items %}
     <tr>
         <td>{{val.title}}</td>
         <td>{{val.qty}}</td>
@@ -21,13 +22,6 @@
       </tr>
     {% endfor %}
 </tbody>
-    <h3>Total cost {{total_cost}}</h3>
 </table>
-<form action="{% url 'checkout_page' %}" method="POST">
-  <div class = 'mb-5'>
-  {% csrf_token %}
-  {{ form }}
-  <br>
-  <button type="submit" class="btn btn-primary mt-2">Add</button>
-</form>
+<div>{% if invoice.note %}Note: {{ invoice.note }}</div>{% endif %}
 {% endblock %}

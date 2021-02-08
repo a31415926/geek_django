@@ -12,4 +12,5 @@ urlpatterns = [
     path('<int:pk>/', details_page, name='post_detail'),
     path('<int:pk>/update/', UpdateGoodsView.as_view(), name='post_update'),
     path('cats/<int:pk>/', CategoryPage.as_view(), name='cats_page'),
+    path('invoice/<str:slug>/', InvoicesPageView.as_view(), name='invoice_page'),
 ]
