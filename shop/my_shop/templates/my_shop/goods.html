@@ -12,6 +12,8 @@
     is_active: {{goods_info.is_active}}
     <br>
     date_add: {{goods_info.date_add}}
+    <br>
+    author: {{goods_info.author}}
 
 
     <form action="" method="POST">
@@ -20,7 +22,7 @@
         <input type="hidden" name="qty" value="{{ goods_info.id }}">
         <input type="submit">
     </form>
-
+    {% if user.id == goods_info.author.id %}
     <form action="{% url 'post_detail' goods_info.id %}" method='POST'>
         {% csrf_token %}
             <a href="{% url 'post_update' goods_info.id %}" class="btn btn-primary mt-2">UPDATE</a><br>
@@ -31,5 +33,6 @@
         {% else %}
             <button type="submit" class="btn btn-primary mt-2" name='activate' value="{{goods_info.id}}">activate</button>
         {% endif %}
-        </form>
+    </form>
+    {% endif %}
 {% endblock %}

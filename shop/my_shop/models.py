@@ -1,7 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Product(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     title = models.CharField(max_length=300, default='Noname')
     quantity = models.IntegerField(blank=True, default=10) #default 10 for tests
     id_rozetka = models.IntegerField(blank=True, default=0)

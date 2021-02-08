@@ -17,22 +17,41 @@ class HomePage(ListView):
 
 
 class CreateGoodsView(CreateView):
+    """ создание товара """
     model = Product
     template_name = 'my_shop/create.html'
     form_class = ProdForm
-    success_url = reverse_lazy('post_detail')
+
+    def form_valid(self, form):
+        self.object = form.save(commit = False)
+        self.object.author = self.request.user
+        self.object.save()
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('post_detail', kwargs={'pk': self.object.id})
 
 
 class CreateCategoryView(CreateView):
+    """ создание категории """
     model = Categories
     template_name = 'my_shop/create.html'
     form_class = ProdForm
     success_url = reverse_lazy('main_page')
 
 
+class DetailPageView(DetailView):
+    """ temp """
+    model = Product
+    template_name = 'my_shop/goods.html'
+
+    def get_queryset(self):
+        return Product.objects.filter(id = self.kwargs['pk'])
+
+
 def details_page(request, pk):
     goods_info = get_object_or_404(Product, id=pk)
-
+    
     if request.method == 'POST':
         form = request.POST
         if form.get('activate'):
@@ -83,12 +102,18 @@ class CategoryPage(ListView):
         return Product.objects.filter(cid = self.kwargs['pk'])
 
 
-def search_page(request):
-    search_val = request.GET.get('q')
-    products = ''
-    if search_val:
-        products = Product.objects.filter(Q(title__icontains=search_val) | Q(desc__icontains=search_val))
-    return render(request, 'my_shop/search.html', context={'products':products})
+class SearchPageView(ListView):
+    """ страница поиска """
+    model = Product
+    template_name = 'my_shop/search.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        search_val = self.request.GET['q']
+        context = Product.objects.filter(
+                Q(title__icontains=search_val) | Q(desc__icontains=search_val)
+            )
+        return context
 
 
 def basket_page(request):
