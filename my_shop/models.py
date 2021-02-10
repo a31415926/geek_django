@@ -41,7 +41,7 @@ class Invoices(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    goods = models.JSONField(default = {})
+    goods = models.JSONField(default = dict)
     note = models.TextField(blank=True, null=True, default='')
     date_create = models.DateTimeField(auto_now_add=True)
     status = models.CharField(default='new', choices=status_choices, max_length=50)
