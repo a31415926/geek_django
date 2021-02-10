@@ -22,7 +22,7 @@
         <input type="hidden" name="qty" value="{{ goods_info.id }}">
         <input type="submit">
     </form>
-    {% if user.id == goods_info.author.id %}
+    {% if user.id == goods_info.author.id and user.username%}
     <form action="{% url 'post_detail' goods_info.id %}" method='POST'>
         {% csrf_token %}
             <a href="{% url 'post_update' goods_info.id %}" class="btn btn-primary mt-2">UPDATE</a><br>
