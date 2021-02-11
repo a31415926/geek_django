@@ -45,5 +45,5 @@ class Invoices(models.Model):
     note = models.TextField(blank=True, null=True, default='')
     date_create = models.DateTimeField(auto_now_add=True)
     status = models.CharField(default='new', choices=status_choices, max_length=50)
-    slug = models.SlugField(default='None', max_length=100)
+    slug = models.SlugField(default='None', max_length=255)
     
