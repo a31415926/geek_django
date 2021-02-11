@@ -185,7 +185,8 @@ class CheckoutPage(CreateView):
 
     def form_valid(self, form):
         self.object = form.save(commit = False)
-        self.object.user = self.request.user
+        if self.request.user.is_authenticated:
+            self.object.user = self.request.user
         self.object.goods = self.request.session['basket']
         self.object.slug = hashlib.sha512((str(time()) + str(self.object.id) ).encode('utf-8')).hexdigest()
         self.object.save()
