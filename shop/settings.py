@@ -44,10 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'social_django',
+    'bs4',
     'rest_framework',
     'my_shop',
     'accounts',
     'api',
+    'olx',
 ]
 
 MIDDLEWARE = [

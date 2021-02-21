@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <form action="" method="POST">
+        {%csrf_token%}
+        <span>link:</span> <input type="text" name='link'><br>
+        <span>QTY:</span> <input type="number" name='qty'><br>
+        <button type="submit">parse</button>
+
+    </form>
+{% endblock %}
